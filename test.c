@@ -1,33 +1,55 @@
 #include<stdio.h>
-#include<string.h>
-#include<errno.h>
-#include<unistd.h>
-#include<stdlib.h>
+#include<iostream>
+#include<vector>
 #include<sys/types.h>
 #include<wait.h>
-//int main(){
- // printf("I'm a process\n");
-//  sleep(1);
-//  //return 0;
-//  exit(123);
-//}
+#include<unistd.h>
+#include<stdlib.h>
+
+class Task{
+  public:
+    void operator()(){
+      printf("hahaha\n");
+    }
+};
+
+void CreatChildProcess(int a,std::vector<pid_t>* con){
+  int b=0;
+  for(;b<a;b++){
+    pid_t id=fork();
+    if(id==0){
+      //child
+     Task()();
+    //  std::cout<<std::endl;
+    //  std::cout<<"hahaha,我是第"<<b<<"个子进程！"<<std::endl;
+    //  std::cout<<std::endl;
+      sleep(1);
+      //con->push_back(getpid());//等一会试一下引用怎么样！
+      exit(0);
+    }
+    else if(id>0){
+      con->push_back(id);
+    }
+  }
+}
+void WaitChildProcess(int a,std::vector<pid_t>* con){
+  int status=0;
+  for(auto& x:(*con)){
+    pid_t rid=waitpid(x,&status,0);
+    if(rid>0){
+      std::cout<<"我是pid为"<<x<<"的进程，我成功被回收了，我的exit_cod="<<((status>>8)&0xFF)<<"我的exit_sig="<<(status&0x7F)<<std::endl;
+    }else{
+      std::cout<<"进程"<<x<<"回收失败"<<std::endl;
+      exit(0);
+    }
+  }
+}
+
+
 
 int main(){
-  pid_t id=fork();
-  if(id==0){
-    while(1){
-  sleep(1);
-  printf("我是一个子进程！ pid=%d\n",getpid());
-    }
-  exit(10);
-  }
-  else{
-    printf("我是一个父进程！pid=%d\n",getpid());
-    int status=0;
-    pid_t rid=waitpid(-1,&status,0);
-    if(rid==id){
-      printf("等待子进程死亡成功！子进程的信息,exit_sig=%d,exit_cod=%d\n",status&0x7F,(status>>8)&0xFF);
-    }
-  }
+  std::vector<pid_t> _con;
+  CreatChildProcess(5,&_con);
+  WaitChildProcess(5,&_con);
   return 0;
 }
