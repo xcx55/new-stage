@@ -13,7 +13,7 @@ class Task{
     }
 };
 
-void CreatChildProcess(int a,std::vector<pid_t>* con){
+void CreatChildProcess(int a,std::vector<pid_t>& con){
   int b=0;
   for(;b<a;b++){
     pid_t id=fork();
@@ -28,7 +28,7 @@ void CreatChildProcess(int a,std::vector<pid_t>* con){
       exit(0);
     }
     else if(id>0){
-      con->push_back(id);
+      con.push_back(id);
     }
   }
 }
@@ -49,7 +49,7 @@ void WaitChildProcess(int a,std::vector<pid_t>* con){
 
 int main(){
   std::vector<pid_t> _con;
-  CreatChildProcess(5,&_con);
+  CreatChildProcess(5,_con);
   WaitChildProcess(5,&_con);
   return 0;
 }
